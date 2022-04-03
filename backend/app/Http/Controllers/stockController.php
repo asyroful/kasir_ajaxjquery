@@ -16,7 +16,8 @@ class stockController extends Controller
 
     public function index()
     {
-        $stock = Stock::all();
+        $stock = Stock::query()->paginate(10);
+
         return response()->json([
             'status' => 200,
             'message' => 'Successfully get data !',

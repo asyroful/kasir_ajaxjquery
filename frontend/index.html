@@ -49,20 +49,21 @@
               dataType: 'json', // added data type
               success: function(mydata) {
               //alert(JSON.stringify(mydata));
-                var size = Object.keys(mydata.data).length;
+                var size = mydata.data.data.length;
+                console.log(mydata)
                 var val ="";
                 var i;
                 var no = 1;
                 for (i=0; i<size; i++) {
                       val +='<tr>';
                       val +='<td>'+no+'</td>';
-                      val +='<td id="nama'+mydata.data[i].id+'">'+mydata.data[i].nama_barang+'</td>';
-                      val +='<td id="harga'+mydata.data[i].id+'">'+mydata.data[i].harga+'</td>';
+                      val +='<td id="nama'+mydata.data.data[i].id+'">'+mydata.data.data[i].nama_barang+'</td>';
+                      val +='<td id="harga'+mydata.data.data[i].id+'">'+mydata.data.data[i].harga+'</td>';
                       val +='<td align="center">';
-                      val +='<button class="btn btn-xs btn-info" onclick="  editData('+mydata.data[i].id+')">'
+                      val +='<button class="btn btn-xs btn-info" onclick="  editData('+mydata.data.data[i].id+')">'
                             +'<i class="fas fa-edit"></i> Edit</button>&nbsp;';
-                      val +='<p id="del'+mydata.data[i].id+'" class="d-none">'+mydata.data[i].nama_barang+'</p>';
-                      val +='<button class="btn btn-xs btn-warning" onclick="confirmDialog('+mydata.data[i].id+')">'
+                      val +='<p id="del'+mydata.data.data[i].id+'" class="d-none">'+mydata.data.data[i].nama_barang+'</p>';
+                      val +='<button class="btn btn-xs btn-warning" onclick="confirmDialog('+mydata.data.data[i].id+')">'
                             +'<i class="fas fa-trash"></i> Hapus</button>';
                       val +="</td>";
                       val +="</tr>";
@@ -70,6 +71,23 @@
                       no++;
                 }
                 $("#hasil").html(val);
+
+                const pagination = mydata.data.links;
+
+                pagination.forEach(paginate => {
+                  const li = document.createElement('li');
+                  const a = document.createElement('a');
+
+                  if (link.url) {
+                    a.innerHTML = paginate.label;
+                    let path = window.location.href.split('?')[0];
+
+                    // TODO: buat path
+                    a.href = path
+                  }
+                })
+
+                console.log(pagination);
             }
         });
     }
@@ -355,12 +373,8 @@
               </div>
               <!-- /.card-body -->
               <div class="card-footer clearfix">
-                <ul class="pagination pagination-sm m-0 float-right">
-                  <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
-                  <li class="page-item"><a class="page-link" href="#">1</a></li>
-                  <li class="page-item"><a class="page-link" href="#">2</a></li>
-                  <li class="page-item"><a class="page-link" href="#">3</a></li>
-                  <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+                <ul id="pagination" class="pagination pagination-sm m-0 float-right">
+                  
                 </ul>
               </div>
             </div>
