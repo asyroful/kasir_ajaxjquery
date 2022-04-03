@@ -88,13 +88,13 @@ class stockController extends Controller
         ]);
     }
 
-    public function search(Stock $stock)
+    public function search($katakunci)
     {
-        // $search = $stock->search();
-        // $stock = Stock::where('nama_barang' , "%" . $stock ."%");
-        // return response()->json([
-        //     'status' => 200,
-        //     'message' => 'Successfully delete data with id !'
-        // ]);
+        $stock = Stock::where('nama_barang', 'LIKE', '%'. $katakunci .'%')->get();
+        return response()->json([
+            'status' => 200,
+            'message' => 'Successfully search data with id !',
+            'data' => $stock
+        ]);
     }
 }

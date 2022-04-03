@@ -190,24 +190,41 @@
     }
     
     function search(){
-    //   var stc = $("#nama_barang").val()
-      
-    //   const dataSearch = new Object();
-    //   dataSearch.nama_barang = stc;
-     
-    //   $.ajax({
-    //   type: 'POST',
-    //   url: 'http://localhost:8000/stock',
-    //   data: JSON.stringify(dataSearch),
-    //   dataType: "json",
-    //   success: function(response) {
-    //     if (response.status == "success") {
-    //       $("#nama_barang").val(response.nama_barang);
-    //     } else {
-    //       alert("data not found")
-    //     }
-    //   }
-    // })
+      var katakunci=  $("#kata_kunci").val()
+      if(katakunci != ""){
+        $.ajax({
+          url: 'http://localhost:8000/stock/search/' + katakunci,
+          type: 'GET',
+          success: function(mydata) {
+              var val ="";
+              var size = Object.keys(mydata.data).length;
+              var nama_barang;
+              var i;
+              var no = 1;
+              for (i=0; i<size; i++) {
+                  val +='<tr>';
+                  val +='<td>'+no+'</td>';
+                  val +='<td id="nama'+mydata.data[i].id+'">'+mydata.data[i].nama_barang+'</td>';
+                  val +='<td id="harga'+mydata.data[i].id+'">'+mydata.data[i].harga+'</td>';
+                  val +='<td align="center">';
+                  val +='<button class="btn btn-xs btn-info" onclick="editData('+mydata.data[i].id+')">'
+                      +'<i class="fas fa-edit"></i> Edit</button>&nbsp;';
+                  val += '<p id="h_'+mydata.data[i].id+'" class="d-none">'+mydata.data[i].nama_barang+'</p>'
+                  val +='<button class="btn btn-xs btn-warning" onclick="confirmDialog('+mydata.data[i].id+')">'
+                      +'<i class="fas fa-trash"></i> Hapus</button>';
+                 val +="</td>";
+                 val +="</tr>";
+                 no++;
+              }
+            $("#hasil").html(val);
+          },
+          error: function (err) {
+            alert("eror :"+JSON.stringify(err));
+          }
+        });
+      }else{
+        getJsonData()
+      }  
     }
 
   </script>
@@ -316,7 +333,7 @@
                   <form method="" action="">
                     <div class="row">
                         <div class="col-md-4 bottom-10">
-                          <input type="text" class="form-control" id="kata_kunci" name="katakunci">
+                          <input type="text" class="form-control" id="kata_kunci" onkeyup="search()">
                         </div>
                         <div class="col-md-5 bottom-10">
                           <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i>&nbsp; Search</button>

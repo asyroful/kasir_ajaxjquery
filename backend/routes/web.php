@@ -16,3 +16,4 @@ use App\Http\Controllers\stockController;
 */
 
 Route::resource('stock', App\Http\Controllers\stockController::class);
+Route::get('stock/search/{katakunci}', [App\Http\Controllers\stockController::class, 'search']);
