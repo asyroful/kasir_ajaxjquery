@@ -5,9 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Transaction extends Model
+class Transactions extends Model
 {
     use HasFactory;
+    protected $table = 'transactions';
     public $timestamps = false;
-    protected $fillable = [];
+    protected $fillable = ['id_barang', 'id_penjualan', 'sub_total', 'jumlah'];
 }

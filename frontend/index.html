@@ -35,109 +35,114 @@
   <link rel="stylesheet" href="plugins/select2/css/select2.min.css">
   <link rel="stylesheet" href="plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
   <script>
+    
     function getAllData() {
       getJsonData();
-      $("#insertModal").hide();
       $("editModal").hide();
-      $("#deleteModal").hide();
+      $("hapusModal").hide();
     }
 
-    function getJsonData() {
+    function getJsonData(page = 1) {
         $.ajax({
-              url: "http://localhost:8000/stock",
+              url: "http://localhost:8000/api/barang?page=" + page,
               type: 'GET',
               dataType: 'json', // added data type
               success: function(mydata) {
-              //alert(JSON.stringify(mydata));
-                var size = mydata.data.data.length;
-                console.log(mydata)
-                var val ="";
-                var i;
-                var no = 1;
-                for (i=0; i<size; i++) {
+                var val =""
+                if(mydata.status == 'FAILED'){
+                    val +='<td>No data record</td>';
+                    val +='<td>No data record</td>';
+                    val +='<td>No data record</td>';
+                    val +='<td>No data record</td>';
+                }else {
+                  var size = Object.keys(mydata.data.data).length;
+                  var i;
+                  var no = 1;
+                  for (i=0; i<size; i++) {
                       val +='<tr>';
-                      val +='<td>'+no+'</td>';
-                      val +='<td id="nama'+mydata.data.data[i].id+'">'+mydata.data.data[i].nama_barang+'</td>';
-                      val +='<td id="harga'+mydata.data.data[i].id+'">'+mydata.data.data[i].harga+'</td>';
+                      val +='<td class="text-center">'+no+'</td>';
+                      val +='<td id="Nama'+mydata.data.data[i].id+'">'+mydata.data.data[i].nama+'</td>';
+                      val +='<td class="text-center" id="Harga'+mydata.data.data[i].id+'">'+mydata.data.data[i].harga+'</td>';
                       val +='<td align="center">';
-                      val +='<button class="btn btn-xs btn-info" onclick="  editData('+mydata.data.data[i].id+')">'
+                      val +='<button class="btn btn-xs btn-info" onclick="editData('+mydata.data.data[i].id+')">'
                             +'<i class="fas fa-edit"></i> Edit</button>&nbsp;';
-                      val +='<p id="del'+mydata.data.data[i].id+'" class="d-none">'+mydata.data.data[i].nama_barang+'</p>';
+                      val += '<p id="h_'+mydata.data.data[i].id+'" class="d-none">'+mydata.data.data[i].nama+'</p>'
                       val +='<button class="btn btn-xs btn-warning" onclick="confirmDialog('+mydata.data.data[i].id+')">'
                             +'<i class="fas fa-trash"></i> Hapus</button>';
                       val +="</td>";
                       val +="</tr>";
-                      //val += mydata.data[i].nama_barang +"<br>";
                       no++;
-                }
-                $("#hasil").html(val);
-
-                const pagination = mydata.data.links;
-
-                pagination.forEach(paginate => {
-                  const li = document.createElement('li');
-                  const a = document.createElement('a');
-
-                  if (link.url) {
-                    a.innerHTML = paginate.label;
-                    let path = window.location.href.split('?')[0];
-
-                    // TODO: buat path
-                    a.href = path
                   }
-                })
+                }
+                $("#hasil").html(val)
 
-                console.log(pagination);
-            }
+                let paging = ""
+                let current_page = mydata.data.current_page
+                let prev = current_page - 1
+                let next = current_page + 1
+                console.log(current_page)
+                let j
+                if(current_page > 1){
+                  paging += '<li class="page-item"><a class="page-link" href="#" onclick="paginate('+prev+')">&laquo;</a></li>'
+                }
+                for(j = 1; j <= mydata.data.last_page; j++){
+                  paging += '<li class="page-item"><a class="page-link" href="#" onclick="paginate('+j+')">'+j+'</a></li>'
+                }
+                if(current_page != mydata.data.last_page){
+                  paging += '<li class="page-item"><a class="page-link" href="#" onclick="paginate('+next+')">&raquo;</a></li>'
+                }
+                $("#paging").html(paging)
+              }
         });
     }
 
-    function showInsertData() {
-      $("#insertModal").show();
+  function paginate(numberPage){
+    getJsonData(numberPage)
+  }
+
+    function showInsertModal(){
+      $("#tambahModal").show()
     }
 
     function closeInsertModal(){
-      $("#insertModal").hide();
+      $("#tambahModal").hide()
     }
 
-    function insertData() {
-      var stc = $("#nama_barang").val()
-      var hrg = $("#harga").val()
-
-      const dataInsert = new Object();
-      dataInsert.nama_barang = stc;
-      dataInsert.harga = hrg;
+    function insertData(){
+      var nama = $("#additem").val()
+      var harga = $("#addharga").val()
+      
+      const data= new Object();
+      data.nama = nama;
+      data.harga = harga;
 
       $.ajax({
-              url: "http://localhost:8000/stock",
-              type: 'POST',
-              data: JSON.stringify(dataInsert),
-              contentType: "application/json; charset=utf-8",
-              dataType: 'json', // added data type
-              success: function(mydata) {
-                  //alert(JSON.stringify(mydata));
-                  $("#insertModal").hide();
-                  $("#nama_barang").val("");
-                  $("#harga").val("");
-                  getJsonData();
-              },
-              error: function (err) {
+          url: 'http://localhost:8000/api/barang/new/data',
+          type: 'POST',
+          data: JSON.stringify(data),
+          contentType: "application/json; charset=utf-8",
+          dataType: 'json',
+          success: function(mydata) {
+            $("#tambahModal").hide()
+            $("#additem").val("");
+            $("#addharga").val("");
+            getJsonData()
+          },
+          error: function (err) {
             alert("eror :"+JSON.stringify(err));
-          }         
+          }
         });
     }
 
     function editData(id){
-        //var modal = document.getElementById("editModal");
         $.ajax({
-              url: "http://localhost:8000/stock/"+id+"/edit",
+              url: "http://localhost:8000/api/barang/"+id+"/edit",
               type: 'GET',
               dataType: 'json', // added data type
               success: function(mydata) {
-                  //alert(JSON.stringify(mydata));
-                  $("#nama_barang").val(mydata.data.nama_barang);
-                  $("#harga").val(mydata.data.harga);
                   $("#id").val(id);
+                  $("#editnama").val(mydata.data.nama);
+                  $("#editharga").val(mydata.data.harga);
                   $("#editModal").show();
             }
         });
@@ -148,30 +153,25 @@
     }
 
     function updateData(){
-      var stc = $("#nama_barang").val();
-      var hrg = $("#harga").val();
       var id = $("#id").val();
-
-      //alert(kat+id);
+      var nama = $("#editnama").val();
+      var harga = $("#editharga").val();
       
       const dataUpdate = new Object();
-      dataUpdate.nama_barang = stc;
-      dataUpdate.harga = hrg;
       dataUpdate.id = id;
+      dataUpdate.nama = nama;
+      dataUpdate.harga = harga;
 
-      //alert(JSON.stringify(dataUpdate));
       $.ajax({
-          url: "http://localhost:8000/stock/"+id,
+          url: 'http://localhost:8000/api/barang/' + id,
           type: 'PUT',
           data: JSON.stringify(dataUpdate),
-          //data: JSON.stringify({ success: 1, nama_barang: kat, id: id }),
           contentType: "application/json; charset=utf-8",
-          dataType: 'JSON',
-          success: function(data, xhr ) {
-            //alert(data);
+          dataType: 'json',
+          success: function(data) {
             $("#editModal").hide();
-            $("#nama"+id).html(stc);
-            $("#harga"+id).html(hrg);
+            $("#Nama"+id).html(nama);
+            $("#Harga"+id).html(harga);
 
           },
           error: function (err) {
@@ -179,72 +179,80 @@
           }
         });
     }
-  
+
     function confirmDialog(id){
-      document.getElementById("hid").value = id
-      var nama_barang = document.getElementById('del'+id).textContent
-      document.getElementById('deleteStock').textContent = "Apakah Anda yakin ingin menghapus " +nama_barang+ "?";
-      $("#deleteModal").show();
+      document.getElementById("Hid").value = id
+      var nama = document.getElementById('h_'+id).textContent
+      document.getElementById('deleteData').textContent = "Apakah anda yakin ingin menghapus " +nama+ " ?";
+      $("#hapusModal").show();
     }
-  
+
     function closeConfirmDialog(){
-      $("#deleteModal").hide();
+      $("#hapusModal").hide();
     }
-  
+
     function deleteData(){
-        var id = document.getElementById("hid").value
-        $.ajax({
-          url: 'http://localhost:8000/stock/'+ id,
+      var id =  document.getElementById("Hid").value
+      $.ajax({
+          url: 'http://localhost:8000/api/barang/' + id,
           type: 'DELETE',
           success: function(data) {
-            $("#nama"+id).closet('tr').remove()
-            $("#deleteModal").hide();
-            getJsonData();
+            $("#Nama"+id).closest('tr').remove()
+            $("#hapusModal").hide();
+            getJsonData()
           },
           error: function (err) {
             alert("eror :"+JSON.stringify(err));
           }
         });
     }
-    
+
     function search(){
-      var katakunci=  $("#kata_kunci").val()
-      if(katakunci != ""){
+      var keyword =  $("#kata_kunci").val()
+      if(keyword != ""){
         $.ajax({
-          url: 'http://localhost:8000/stock/search/' + katakunci,
+          url: 'http://localhost:8000/api/barang/search/' + keyword,
           type: 'GET',
           success: function(mydata) {
-              var val ="";
+            var val ="";
+            if(mydata.status == 'FAILED'){
+                val +='<tr>';
+                val +='<td>No data record</td>';
+                val +='<td>No data record</td>';
+                val +='<td>No data record</td>';
+                val +='<td>No data record</td>';
+                val +='</td>'
+            }else {
               var size = Object.keys(mydata.data).length;
-              var nama_barang;
+              var nama
               var i;
               var no = 1;
               for (i=0; i<size; i++) {
                   val +='<tr>';
                   val +='<td>'+no+'</td>';
-                  val +='<td id="nama'+mydata.data[i].id+'">'+mydata.data[i].nama_barang+'</td>';
-                  val +='<td id="harga'+mydata.data[i].id+'">'+mydata.data[i].harga+'</td>';
+                  val +='<td id="Nama'+mydata.data[i].id+'">'+mydata.data[i].nama+'</td>';
+                  val +='<td id="Harga'+mydata.data[i].id+'">'+mydata.data[i].harga+'</td>';
                   val +='<td align="center">';
                   val +='<button class="btn btn-xs btn-info" onclick="editData('+mydata.data[i].id+')">'
                       +'<i class="fas fa-edit"></i> Edit</button>&nbsp;';
-                  val += '<p id="h_'+mydata.data[i].id+'" class="d-none">'+mydata.data[i].nama_barang+'</p>'
+                  val += '<p id="h_'+mydata.data[i].id+'" class="d-none">'+mydata.data[i].nama+'</p>'
                   val +='<button class="btn btn-xs btn-warning" onclick="confirmDialog('+mydata.data[i].id+')">'
                       +'<i class="fas fa-trash"></i> Hapus</button>';
                  val +="</td>";
                  val +="</tr>";
                  no++;
               }
+            }
             $("#hasil").html(val);
           },
           error: function (err) {
             alert("eror :"+JSON.stringify(err));
           }
         });
-      }else{
+      }else {
         getJsonData()
-      }  
+      }
     }
-
   </script>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed" onload="getAllData()">
@@ -259,20 +267,11 @@
         <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
       </li>
       <li class="nav-item d-none d-sm-inline-block">
-        <a href="index.php" class="nav-link">Home</a>
+        <a href="index.html" class="nav-link">Home</a>
       </li>
       <!--<li class="nav-item d-none d-sm-inline-block">
         <a href="#" class="nav-link">Contact</a>
       </li>-->
-    </ul>
-    <!-- Right navbar links -->
-    <ul class="navbar-nav ml-auto">
-      <li class="nav-item">
-        <a href="signout.php" class="nav-link">
-            Sign Out&nbsp; 
-            <i class="fas fa-sign-out-alt"></i>
-        </a>
-      </li>
     </ul>
   </nav>
   <!-- /.navbar -->
@@ -280,10 +279,13 @@
   <!-- Main Sidebar Container -->
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
   <!-- Brand Logo -->
-  <a href="index.php" class="brand-link">
-    <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
-         style="opacity: .8">
-    <span class="brand-text font-weight-light">AdminKatalog</span>
+  <a href="index.html" class="brand-link">
+    <!-- <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
+         style="opacity: .8"> -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-cart ml-3" viewBox="0 0 16 16">
+      <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+    </svg> 
+    <span class="brand-text font-weight-light">SI-Toserba</span>
   </a>
 
   <!-- Sidebar -->
@@ -338,11 +340,10 @@
     <section class="content">
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title" style="margin-top:5px;"><i class="fas fa-list-ul"></i> Daftar  Data</h3>
-                <div class="card-tools" >
-                  <button type="button" onclick="showInsertData()" class="btn btn-sm btn-info float-right">
-                    <i class="fas fa-plus"></i> Tambah Data</a>
-                  </button>
+                <h3 class="card-title ml-2" style="margin-top:5px;"><i class="fas fa-list-ul"></i> Daftar  Barang</h3>
+                <div class="card-tools mr-2">
+                  <button class="btn btn-sm btn-info float-right" onclick="showInsertModal()">
+                  <i class="fas fa-plus"></i> Tambah Data</button>
                 </div>
               </div>
               <!-- /.card-header -->
@@ -350,12 +351,15 @@
               <div class="col-md-12">
                   <form method="" action="">
                     <div class="row">
+                      <div class="input-group rounded col-md-4 bottom-10">
+                        <input type="text" id="kata_kunci" onkeyup="search()" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+                        <span class="input-group-text border-0" id="search-addon">
+                          <i class="fas fa-search"></i>
+                        </span>
+                      <!-- </div>
                         <div class="col-md-4 bottom-10">
-                          <input type="text" class="form-control" id="kata_kunci" onkeyup="search()">
-                        </div>
-                        <div class="col-md-5 bottom-10">
-                          <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i>&nbsp; Search</button>
-                        </div>
+                          <input type="text" class="form-control fas fa-search" id="kata_kunci" onkeyup="search()">
+                        </div> -->
                     </div><!-- .row -->
                   </form>
                 </div><br>
@@ -363,9 +367,9 @@
                     <thead>                  
                       <tr>
                         <th width="5%" class="text-center">No</th>
-                        <th width="50%">Nama Barang</th>
-                        <th width="30%" class="text-center">Harga</th>
-                        <th width="15%" class="text-center">Aksi</th>
+                        <th width="50%" class="text-center">Nama Barang</th>
+                        <th width="20%" class="text-center">Harga</th>
+                        <th width="25%" class="text-center">Aksi</th>
                       </tr>
                     </thead>
                       <tbody id="hasil"></tbody>
@@ -373,8 +377,12 @@
               </div>
               <!-- /.card-body -->
               <div class="card-footer clearfix">
-                <ul id="pagination" class="pagination pagination-sm m-0 float-right">
-                  
+                <ul class="pagination pagination-sm m-0 float-right" id="paging">
+                  <!-- <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
+                  <li class="page-item"><a class="page-link" href="#">1</a></li>
+                  <li class="page-item"><a class="page-link" href="#">2</a></li>
+                  <li class="page-item"><a class="page-link" href="#">3</a></li>
+                  <li class="page-item"><a class="page-link" href="#">&raquo;</a></li> -->
                 </ul>
               </div>
             </div>
@@ -382,89 +390,79 @@
 
     </section>
     <!-- /.content -->
+
     <!-- modal -->
-    <div class="modal" id="insertModal">
-      <div class="modal-dialog">
+    <div class="modal" tabindex="-1" id="tambahModal" role="dialog">
+      <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title">Tambah Stock</h4>
+            <h5 class="modal-title">Tambah Barang</h5>
           </div>
-          <div class="card-body">
+          <div class="modal-body">
             <div class="form-group row">                
-              <label for="nama_barang" class="col-sm-3 col-form-label">Nama Barang</label>
+              <label for="Nama" class="col-sm-2 col-form-label">Nama</label>
               <div class="col-sm-7">
-                <input type="text" class="form-control" id="nama_barang" value="">
+                <input type="text" class="form-control" id="additem" value="">
               </div>
             </div>
-            <div class="form-group row">                
-              <label for="harga" class="col-sm-3 col-form-label">Harga</label>
-              <div class="col-sm-7">
-                <input type="text" class="form-control" id="harga" value="">
-              </div>
+            <div class="form-group row"> 
+              <label for="harga" class="col-sm-2 col-form-label">Harga</label>
+                <div class="col-sm-7">
+                  <input type="text" class="form-control" id="addharga" value="">
+                </div>
             </div>
           </div>
-          <!-- /.card-body -->
-          <div class="card-footer">
-            <div class="col-sm-12">
-              <button type="button" onclick="insertData()" class="btn btn-info float-right"><i class="fas fa-save"></i> Simpan</button>
-              <button type="button" onclick="closeInsertModal()" class="btn btn-default float-left">Close</button>
-            </div>  
+          <div class="modal-footer">
+            <button type="button" onclick="closeInsertModal()" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+            <button type="button" onclick="insertData()" class="btn btn-primary">Tambah</button>
           </div>
         </div>
-        <!-- /.modal-content -->
       </div>
-      <!-- /.modal-dialog -->
     </div>
-    <!-- modal -->
-    <div class="modal" id="editModal">
-      <div class="modal-dialog">
+
+    <div class="modal" tabindex="-1" id="editModal" role="dialog">
+      <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title">Edit Stock</h4>
+            <h5 class="modal-title">Edit Barang</h5>
           </div>
-          <div class="card-body">
+          <div class="modal-body">
             <div class="form-group row">                
-              <label for="nama_barang" class="col-sm-3 col-form-label">Nama Barang</label>
+              <label for="Nama" class="col-sm-2 col-form-label">Nama</label>
+              <input type="hidden" class="form-control" id="id" value="">
               <div class="col-sm-7">
-                <input type="text" class="form-control" id="nama_barang" value="">
-                <input type="hidden" class="form-control" id="id" value="">
+                <input type="text" class="form-control" id="editnama" value="">
               </div>
             </div>
-            <div class="form-group row">                
-              <label for="harga" class="col-sm-3 col-form-label">Harga</label>
-              <div class="col-sm-7">
-                <input type="text" class="form-control" id="harga" value="">
-              </div>
+            <div class="form-group row"> 
+              <label for="harga" class="col-sm-2 col-form-label">Harga</label>
+                <div class="col-sm-7">
+                  <input type="text" class="form-control" id="editharga" value="">
+                </div>
             </div>
           </div>
-          <!-- /.card-body -->
-          <div class="card-footer">
-            <div class="col-sm-12">
-              <button type="button" onclick="updateData()" class="btn btn-info float-right"><i class="fas fa-save"></i> Simpan</button>
-              <button type="button" onclick="closeEditModal()" class="btn btn-default float-left">Close</button>
-            </div>  
+          <div class="modal-footer">
+            <button type="button" onclick="closeEditModal()" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+            <button type="button" onclick="updateData()" class="btn btn-primary"><i class="fas fa-save mr-1"></i>Update</button>
           </div>
         </div>
-        <!-- /.modal-content -->
       </div>
-      <!-- /.modal-dialog -->
     </div>
-    <div class="modal" id="deleteModal">
+
+    <div class="modal" id="hapusModal">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title">Hapus Stock</h4>
+            <h4 class="modal-title">Hapus Barang</h4>
           </div>
           <div class="card-body">
-            <input type="hidden" class="form-control" id="hid">
-            <p id="deleteStock"></p>
+            <input type="hidden" class="form-control" id="Hid">
+            <p id="deleteData"></p>
           </div>
           <!-- /.card-body -->
-          <div class="card-footer">
-            <div class="col-sm-12">
-              <button type="button" onclick="deleteData()" class="btn btn-info float-right"><i class="fas fa-save"></i> Hapus</button>
-              <button type="button" onclick="closeConfirmDialog()" class="btn btn-default float-left">Cancel</button>
-            </div>  
+          <div class="modal-footer">
+            <button type="button" onclick="closeConfirmDialog()" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+            <button type="button" onclick="deleteData()" class="btn btn-danger"><i class="fas fa-trash mr-1"></i>Hapus</button>
           </div>
         </div>
         <!-- /.modal-content -->
