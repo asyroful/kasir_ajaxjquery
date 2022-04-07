@@ -38,7 +38,7 @@
   <script>
     function getJsonData() {
         $.ajax({
-              url: "http://localhost:8000/api/toserba/get/all",
+              url: "http://myweb.skom.id/api/public/toserba/get/all",
               type: 'GET',
               dataType: 'json', // added data type
               success: function(mydata) {
@@ -140,7 +140,7 @@
       final.total = pay;
 
       $.ajax({
-          url: 'http://localhost:8000/api/toserba/total',
+          url: "myweb.skom.id/api/public/api/toserba/total",
           type: 'POST',
           data: JSON.stringify(final),
           contentType: "application/json; charset=utf-8",
@@ -168,7 +168,7 @@
         data.sub_total = subTotal;
 
         $.ajax({
-          url: 'http://localhost:8000/api/toserba/trx',
+          url: 'http://myweb.skom.id/api/public/toserba/trx',
           type: 'POST',
           data: JSON.stringify(data),
           contentType: "application/json; charset=utf-8",

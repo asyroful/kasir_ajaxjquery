@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>AdminKatalog | VOKASI UB</title>
+  <title>SI-Toserba | VOKASI UB</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Font Awesome -->
@@ -44,7 +44,7 @@
 
     function getJsonData(page = 1) {
         $.ajax({
-              url: "http://localhost:8000/api/toserba?page=" + page,
+              url: "http://myweb.skom.id/api/public/toserba?page=" + page,
               type: 'GET',
               dataType: 'json', // added data type
               success: function(mydata) {
@@ -117,7 +117,7 @@
       data.harga = harga;
 
       $.ajax({
-          url: 'http://localhost:8000/api/toserba/new/data',
+          url: "http://myweb.skom.id/api/public/toserba/new/data",
           type: 'POST',
           data: JSON.stringify(data),
           contentType: "application/json; charset=utf-8",
@@ -136,7 +136,7 @@
 
     function editData(id){
         $.ajax({
-              url: "http://localhost:8000/api/toserba/"+id+"/edit",
+              url: "http://myweb.skom.id/api/public/toserba/"+id+"/edit",
               type: 'GET',
               dataType: 'json', // added data type
               success: function(mydata) {
@@ -163,7 +163,7 @@
       dataUpdate.harga = harga;
 
       $.ajax({
-          url: 'http://localhost:8000/api/toserba/' + id,
+          url: 'http://myweb.skom.id/api/public/toserba/' + id,
           type: 'PUT',
           data: JSON.stringify(dataUpdate),
           contentType: "application/json; charset=utf-8",
@@ -194,7 +194,7 @@
     function deleteData(){
       var id =  document.getElementById("Hid").value
       $.ajax({
-          url: 'http://localhost:8000/api/toserba/' + id,
+          url: 'http://myweb.skom.id/api/public/toserba/' + id,
           type: 'DELETE',
           success: function(data) {
             $("#Nama"+id).closest('tr').remove()
@@ -211,7 +211,7 @@
       var keyword =  $("#kata_kunci").val()
       if(keyword != ""){
         $.ajax({
-          url: 'http://localhost:8000/api/toserba/search/' + keyword,
+          url: 'http://myweb.skom.id/api/public/toserba/search/' + keyword,
           type: 'GET',
           success: function(mydata) {
             var val ="";

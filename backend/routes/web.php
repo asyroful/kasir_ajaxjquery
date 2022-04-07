@@ -14,9 +14,9 @@ use App\Http\Controllers\TransactionsController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::resource('/api/toserba', StocksController::class);
-Route::post('/api/toserba/new/data', [StocksController::class, 'store']);
-Route::get('/api/toserba/get/all', [StocksController::class, 'getAll']);
-Route::get('/api/toserba/search/{keyword}', [StocksController::class, 'search']);
-Route::post('/api/toserba/total', [TransactionsController::class, 'saveTotal']);
-Route::post('/api/toserba/trx', [TransactionsController::class, 'saveTrx']);
+Route::resource('/toserba', StocksController::class);
+Route::post('/toserba/new/data', [StocksController::class, 'store']);
+Route::get('/toserba/get/all', [StocksController::class, 'getAll']);
+Route::get('/toserba/search/{keyword}', [StocksController::class, 'search']);
+Route::post('/toserba/total', [TransactionsController::class, 'saveTotal']);
+Route::post('/toserba/trx', [TransactionsController::class, 'saveTrx']);
